@@ -165,8 +165,18 @@ class MonteCarlo(object):
 
             legal = self.board.legal_plays(state)
             play = []
-            for legalPlays in legal:
+            for index, legalPlays in enumerate(legal):
                 bestPlay = legalPlays[0]
+                newState = copy.deepcopy(state)
+                player1Cards = newState.player1Cards
+                newState.player1Cards = legalPlays
+                if index == 0:
+                    newState.player1Cards = player1Cards
+                elif index == 1:
+                    newState.player2Cards = player1Cards
+                elif index == 2:
+                    newState.player3Cards = player1Cards
+                hashedState = hash(newState)
                 if(all(self.plays.get((hashedState, legalPlay)) for legalPlay in legalPlays)):
                     bestPlayStats = 0
                     totalLog = log(
@@ -211,12 +221,12 @@ def testing():
 
     a = Board()
 
-    initialState = a.init()
+    initialState = a.init([])
 
     mc = MonteCarlo(a, initialState, 1, 100)
     while numberOfGames < 10:
 
-        newState = a.init()
+        newState = a.init([])
         mc.reset(newState)
         previousState = newState
         while True:

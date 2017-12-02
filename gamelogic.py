@@ -90,6 +90,3 @@ def test():
         max_games -= 1
 
     print total_wins_for_player
-
-
-test()

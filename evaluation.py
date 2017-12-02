@@ -6,6 +6,12 @@ random.seed("prump")
 
 numberOfGames = 0
 
+board = montecarlo.Board()
+
+initialPhase2 = board.init([])
+
+mc = montecarlo.MonteCarlo(board, initialPhase2, 1, 100)
+
 winners = [0, 0, 0]
 
 while numberOfGames < 100:
@@ -15,11 +21,7 @@ while numberOfGames < 100:
         phase1[1].cards,
         phase1[2].cards]
 
-    board = montecarlo.Board()
-
     initialPhase2 = board.init(playerCards)
-
-    mc = montecarlo.MonteCarlo(board, initialPhase2, 1, 100)
 
     mc.reset(initialPhase2)
 
