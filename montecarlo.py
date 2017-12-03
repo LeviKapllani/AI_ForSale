@@ -6,20 +6,22 @@ import copy
 from random import choice
 from math import log, sqrt
 
-random.seed("seeed")
+random.seed("1234")
 
 
 class State():
-    def __init__(self, player1Cards, player2Cards, player3Cards, money, playersMoney):
+    def __init__(self, player1Cards, player2Cards, player3Cards, money, playersMoney, roundMoney):
         self.player1Cards = player1Cards
         self.player2Cards = player2Cards
         self.player3Cards = player3Cards
         self.money = money
         self.playersMoney = playersMoney
+        self.roundMoney = roundMoney
 
     def __hash__(self):
-        return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards)))
-        # return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.money), str(self.playersMoney)))
+        # return hash((str(self.player1Cards), str(self.roundMoney)))
+        return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.roundMoney)))
+        # return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.money), str(self.playersMoney), str(self.roundMoney)))
 
 
 class Board():
@@ -40,16 +42,18 @@ class Board():
         money = [0, 0, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8,
                  9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
 
+        random.shuffle(money)
+        roundMoney = sorted(money[:3])
+
         currentPlayer = random.choice([1, 2, 3])
         # new("State",{'player1Cards':player1Cards, "player2Cards":player2Cards, "player3Cards": player3Cards, "money": money, "playersMoney":playersMoney})
-        return State(player1Cards, player2Cards, player3Cards, money, playersMoney)
+        return State(player1Cards, player2Cards, player3Cards, money, playersMoney, roundMoney)
 
     def next_state(self, state, play):
         # Takes the game state, and the move to be applied.
         # Returns the new game state.
 
-        random.shuffle(state.money)
-        roundMoney = sorted(state.money[:3])
+        roundMoney = state.roundMoney
 
         moves = [[0, play[0]], [1, play[1]], [2, play[2]]]
 
@@ -74,6 +78,9 @@ class Board():
         del state.money[:3]
 
         state.money.sort()
+
+        random.shuffle(state.money)
+        state.roundMoney = sorted(state.money[:3])
 
         return state
 
@@ -113,7 +120,7 @@ class MonteCarlo(object):
         self.wins = {}
         self.gamesWon = 0
         self.gamesPlayed = 0
-        self.C = 10.0
+        self.C = 2
 
     def update(self, state):
 
@@ -140,7 +147,7 @@ class MonteCarlo(object):
             games += 1
 
         hashedState = hash(state)
-        bestMove = legalMoves[0]
+        bestMove = choice(legalMoves)
         bestMoveWinPercentage = 0
         for move in legalMoves:
             moveWinPercentage = self.wins.get(
@@ -156,17 +163,18 @@ class MonteCarlo(object):
         states_copy = copy.deepcopy(self.states)
         state = states_copy[-1]
         hashedState = hash(state)
-
         player = 1
         expand = True
 
         winner = 0
 
         for t in xrange(100):
+            hashedState = hash(state)
             legal = self.board.legal_plays(state)
             play = [0, choice(legal[1]), choice(legal[2])]
 
             legalPlays = legal[0]
+            bestPlay = choice(legalPlays)
             if(all(self.plays.get((hashedState, legalPlay)) for legalPlay in legalPlays)):
                 bestPlayStats = 0
                 totalLog = log(
@@ -175,6 +183,7 @@ class MonteCarlo(object):
                     playStats = (self.wins[(hashedState, legalPlay)] / self.plays[(
                         hashedState, legalPlay)]) + self.C * sqrt(totalLog / self.plays[(hashedState, legalPlay)])
                     if playStats > bestPlayStats:
+                        bestPlayStats = playStats
                         bestPlay = legalPlay
             else:
                 bestPlay = choice(legalPlays)
@@ -183,7 +192,6 @@ class MonteCarlo(object):
 
             state = self.board.next_state(state, play)
             states_copy.append(state)
-            hashedState = hash(state)
             if expand and (hashedState, play[0]) not in self.plays:
                 expand = False
                 self.plays[(hashedState, play[0])] = 0
@@ -197,7 +205,6 @@ class MonteCarlo(object):
                     self.gamesWon += 1
                 self.gamesPlayed += 1
                 break
-
         for hashedState, play in visited_states:
             if (hashedState, play) not in self.plays:
                 continue
@@ -229,13 +236,11 @@ def testing():
                 break
 
         print mc.gamesPlayed
-        if mc.gamesWon > 0:
-            break
+        print mc.gamesWon
 
         numberOfGames += 1
 
 
-testing()
 # print state.money
 # nextState = a.next_state(state,[state.player1Cards[0], state.player2Cards[1], state.player3Cards[2]])
 # print nextState.money
