@@ -10,7 +10,7 @@ board = montecarlo.Board()
 
 initialPhase2 = board.init([])
 
-mc = montecarlo.MonteCarlo(board, initialPhase2, 1, 100)
+mc = montecarlo.MonteCarlo(board, initialPhase2, 5, 100)
 
 winners = [0, 0, 0]
 

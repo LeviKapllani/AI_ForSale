@@ -18,7 +18,8 @@ class State():
         self.playersMoney = playersMoney
 
     def __hash__(self):
-        return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.money), str(self.playersMoney)))
+        return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards)))
+        # return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.money), str(self.playersMoney)))
 
 
 class Board():
@@ -112,7 +113,7 @@ class MonteCarlo(object):
         self.wins = {}
         self.gamesWon = 0
         self.gamesPlayed = 0
-        self.C = 1.4
+        self.C = 10.0
 
     def update(self, state):
 
@@ -161,35 +162,24 @@ class MonteCarlo(object):
 
         winner = 0
 
-        for t in xrange(self.max_moves):
-
+        for t in xrange(100):
             legal = self.board.legal_plays(state)
-            play = []
-            for index, legalPlays in enumerate(legal):
-                bestPlay = legalPlays[0]
-                newState = copy.deepcopy(state)
-                player1Cards = newState.player1Cards
-                newState.player1Cards = legalPlays
-                if index == 0:
-                    newState.player1Cards = player1Cards
-                elif index == 1:
-                    newState.player2Cards = player1Cards
-                elif index == 2:
-                    newState.player3Cards = player1Cards
-                hashedState = hash(newState)
-                if(all(self.plays.get((hashedState, legalPlay)) for legalPlay in legalPlays)):
-                    bestPlayStats = 0
-                    totalLog = log(
-                        sum(self.plays[(hashedState, legalPlay)] for legalPlay in legalPlays))
-                    for legalPlay in legalPlays:
-                        playStats = (self.wins[(hashedState, legalPlay)] / self.plays[(
-                            hashedState, legalPlay)]) + self.C * sqrt(totalLog / self.plays[(hashedState, legalPlay)])
-                        if playStats > bestPlayStats:
-                            bestPlay = legalPlay
-                else:
-                    bestPlay = choice(legalPlays)
+            play = [0, choice(legal[1]), choice(legal[2])]
 
-                play.append(bestPlay)
+            legalPlays = legal[0]
+            if(all(self.plays.get((hashedState, legalPlay)) for legalPlay in legalPlays)):
+                bestPlayStats = 0
+                totalLog = log(
+                    sum(self.plays[(hashedState, legalPlay)] for legalPlay in legalPlays))
+                for legalPlay in legalPlays:
+                    playStats = (self.wins[(hashedState, legalPlay)] / self.plays[(
+                        hashedState, legalPlay)]) + self.C * sqrt(totalLog / self.plays[(hashedState, legalPlay)])
+                    if playStats > bestPlayStats:
+                        bestPlay = legalPlay
+            else:
+                bestPlay = choice(legalPlays)
+
+            play[0] = bestPlay
 
             state = self.board.next_state(state, play)
             states_copy.append(state)
@@ -212,7 +202,7 @@ class MonteCarlo(object):
             if (hashedState, play) not in self.plays:
                 continue
             self.plays[(hashedState, play)] += 1
-            if player == winner:
+            if winner == 1:
                 self.wins[(hashedState, play)] += 1
 
 
@@ -224,7 +214,7 @@ def testing():
     initialState = a.init([])
 
     mc = MonteCarlo(a, initialState, 1, 100)
-    while numberOfGames < 10:
+    while numberOfGames < 100:
 
         newState = a.init([])
         mc.reset(newState)
@@ -239,11 +229,13 @@ def testing():
                 break
 
         print mc.gamesPlayed
-        print mc.gamesWon
+        if mc.gamesWon > 0:
+            break
 
         numberOfGames += 1
 
+
+testing()
 # print state.money
 # nextState = a.next_state(state,[state.player1Cards[0], state.player2Cards[1], state.player3Cards[2]])
-
 # print nextState.money
