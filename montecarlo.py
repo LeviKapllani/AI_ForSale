@@ -19,8 +19,8 @@ class State():
         self.roundMoney = roundMoney
 
     def __hash__(self):
-        # return hash((str(self.player1Cards), str(self.roundMoney)))
-        return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.roundMoney)))
+        return hash((str(self.player1Cards), str(self.roundMoney)))
+        # return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.roundMoney)))
         # return hash((str(self.player1Cards), str(self.player2Cards), str(self.player3Cards), str(self.money), str(self.playersMoney), str(self.roundMoney)))
 
 
@@ -110,7 +110,7 @@ class Board():
 
 
 class MonteCarlo(object):
-    def __init__(self, board, initialState, seconds, max_moves):
+    def __init__(self, board, initialState, seconds, max_moves, C):
 
         self.board = board
         self.calculation_time = datetime.timedelta(seconds=seconds)
@@ -120,7 +120,7 @@ class MonteCarlo(object):
         self.wins = {}
         self.gamesWon = 0
         self.gamesPlayed = 0
-        self.C = 2
+        self.C = C
 
     def update(self, state):
 

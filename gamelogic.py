@@ -3,6 +3,8 @@ import numpy as np
 import AI_logic
 import random
 
+random.seed("1")
+
 
 class Player:
     def __init__(self, money, money_spend):
@@ -15,8 +17,8 @@ class Player:
 def game():
     cards = range(1, 31)
 
-    players = [Player(18, AI_logic.money_spend1), Player(
-        18, AI_logic.money_spend1), Player(18, AI_logic.money_spend1)]
+    players = [Player(18, AI_logic.money_spend2), Player(
+        18, AI_logic.money_spend1), Player(18, AI_logic.money_spend2)]
 
     starting_player = random.choice([0, 1, 2])
     while len(cards) != 0:

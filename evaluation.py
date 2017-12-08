@@ -2,6 +2,7 @@ import gamelogic
 import montecarlo
 import random
 
+
 random.seed("prump")
 
 numberOfGames = 0
@@ -10,7 +11,7 @@ board = montecarlo.Board()
 
 initialPhase2 = board.init([])
 
-mc = montecarlo.MonteCarlo(board, initialPhase2, 1, 100)
+mc = montecarlo.MonteCarlo(board, initialPhase2, 5, 100, 1)
 
 winners = [0, 0, 0]
 
@@ -36,6 +37,6 @@ while numberOfGames < 100:
         if len(previousState.money) == 0:
             winners[board.winner(previousState) - 1] += 1
             break
-    if numberOfGames % 1 == 0:
+    if numberOfGames % 10 == 0:
         print numberOfGames
         print winners
